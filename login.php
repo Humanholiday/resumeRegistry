@@ -1,11 +1,9 @@
 <?php
 require 'pdo.php';
+require 'util.php';
 session_start();
 
-if (isset($_POST['cancel'])) {
-  header("Location: index.php");
-  return;
-}
+clickCancel();
 
 if (isset($_POST['email']) && $_POST['pword']) {
   // Data validation
@@ -51,39 +49,29 @@ if (isset($_POST['email']) && $_POST['pword']) {
 <html>
 
 <head>
-    <title>Resume Registry Login</title>
-    <!-- bootstrap.php - this is HTML -->
-
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-
-    <!-- Optional theme -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
-
-    <link rel="stylesheet" href="style.css">
-
-
+  <?php require "head.php"; ?>
+  <title>Resume Registry Login</title>
 </head>
 
-<div class="container">
-
-    <body style="font-family: sans-serif;">
-        <h1>Please Log In</h1>
-        <?php if (isset($_SESSION["error"])) {
-          echo '<p style="color:red">' . $_SESSION["error"] . "</p>\n";
-          unset($_SESSION["error"]);
-        } ?>
-        <form method="post" action="login.php">
-            <label for="email">Email</label>
-            <input type="text" name="email" id="email"><br>
-            <label for="pword">Password</label>
-            <input type="password" name="pword" id="pword"> <br>
-            <!-- password is umsi -->
-            <input type="submit" onclick="return doValidate();" value="Log In">
-            <input type="submit" name="cancel" value="Cancel">
-        </form>
-</div>
 
 
-<script src="script.js"></script>
+<body style="font-family: sans-serif;">
+
+
+  <div class="container">
+    <h1>Please Log In</h1>
+    <?php flashMessages(); ?>
+    <form method="post" action="login.php">
+      <label for="email">Email</label>
+      <input type="text" name="email" id="email"><br>
+      <label for="pword">Password</label>
+      <input type="password" name="pword" id="pword"> <br>
+      <!-- password is umsi -->
+      <input type="submit" onclick="return doValidate();" value="Log In">
+      <input type="submit" name="cancel" value="Cancel">
+    </form>
+  </div>
+
+
+  <script src="script.js"></script>
 </body>

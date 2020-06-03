@@ -1,12 +1,9 @@
 <?php
 require_once 'pdo.php';
+require 'util.php';
 session_start();
 
-//when form is submitted, check validity then insert into database and redirect to index.php
-if (isset($_POST['cancel'])) {
-  header("Location: index.php");
-  return;
-}
+clickCancel();
 
 if (!isset($_SESSION['user_id'])) {
   $_SESSION['error'] = 'Not logged in';
@@ -95,45 +92,32 @@ $pid = $row['profile_id'];
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Update entry</title>
-    <!-- bootstrap.php - this is HTML -->
-
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-
-    <!-- Optional theme -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
-
-    <link rel="stylesheet" href="style.css">
+  <?php require "head.php"; ?>
+  <title>Update entry</title>
 </head>
 
 <body>
-    <!-- check for error flash message -->
-    <?php if (isset($_SESSION['error'])) {
-      echo '<p style="color:red">' . $_SESSION['error'] . "</p>\n";
-      unset($_SESSION['error']);
-    } ?>
+  <!-- check for error flash message -->
+  <?php flashMessages(); ?>
 
-    <div>
-        <h1>Update Entry</h1><br>
-        <form method="post">
-            <p>First Name:
-                <input type="text" name="first_name" size="60" value=" <?= $fn ?>"></p>
-            <p>Last Name:
-                <input type="text" name="last_name" size="60" value="<?= $ln ?>"></p>
-            <p>Email:
-                <input type="text" name="email" size="60" value="<?= $em ?>"></p>
-            <p>Headline: <br>
-                <input type="text" name="headline" size="80" value="<?= $he ?>"></p>
-            <p>Summary: <br>
-                <textarea name="summary" rows="8" cols="80"><?= $su ?></textarea></p>
-            <input type="hidden" name="profile_id" value="<?= $pid ?>">
-            <p><input type="submit" value="Update" />
-                <input type="submit" name="cancel" value="Cancel" /></p>
-        </form>
-    </div>
+  <div class="container">
+    <h1>Update Entry</h1><br>
+    <form method="post">
+      <p>First Name:
+        <input type="text" name="first_name" size="60" value=" <?= $fn ?>"></p>
+      <p>Last Name:
+        <input type="text" name="last_name" size="60" value="<?= $ln ?>"></p>
+      <p>Email:
+        <input type="text" name="email" size="60" value="<?= $em ?>"></p>
+      <p>Headline: <br>
+        <input type="text" name="headline" size="80" value="<?= $he ?>"></p>
+      <p>Summary: <br>
+        <textarea name="summary" rows="8" cols="80"><?= $su ?></textarea></p>
+      <input type="hidden" name="profile_id" value="<?= $pid ?>">
+      <p><input type="submit" value="Update" />
+        <input type="submit" name="cancel" value="Cancel" /></p>
+    </form>
+  </div>
 </body>
 
 </html>

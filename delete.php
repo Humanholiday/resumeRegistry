@@ -1,12 +1,10 @@
 <?php
 
 require 'pdo.php';
+require 'util.php';
 session_start();
 
-if (isset($_POST['cancel'])) {
-  header("Location: index.php");
-  return;
-}
+clickCancel();
 
 if (!isset($_SESSION['user_id'])) {
   $_SESSION['error'] = 'Not logged in';
@@ -68,35 +66,24 @@ if ($row['user_id'] != $_SESSION['user_id']) {
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Delete profile</title>
-    <!-- bootstrap.php - this is HTML -->
-
-    <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
-
-    <!-- Optional theme -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap-theme.min.css" integrity="sha384-fLW2N01lMqjakBkx3l/M9EahuwpSfeNvV63J5ezn3uZzapT0u7EYsXMjQV+0En5r" crossorigin="anonymous">
-
-    <link rel="stylesheet" href="style.css">
+  <?php require "head.php"; ?>
+  <title>Delete Profile</title>
 </head>
 
 <body>
-    <div class="container">
-        <h1>Deleting Profile</h1>
-        <p>First Name: <?= htmlspecialchars($row['first_name']) ?></p>
-        <p>Last Name: <?= htmlspecialchars($row['last_name']) ?></p>
-        <p>Headline: <?= htmlspecialchars($row['headline']) ?></p>
-        <form action="" method="post">
-            <input type="hidden" name="profile_id" value="<?= $row[
-              'profile_id'
-            ] ?>">
-            <input type="submit" value="Delete" name="delete">
-            <input type="submit" name="cancel" value="Cancel">
-        </form>
+  <div class="container">
+    <h1>Deleting Profile</h1>
+    <?php flashMessages(); ?>
+    <p>First Name: <?= htmlspecialchars($row['first_name']) ?></p>
+    <p>Last Name: <?= htmlspecialchars($row['last_name']) ?></p>
+    <p>Headline: <?= htmlspecialchars($row['headline']) ?></p>
+    <form action="" method="post">
+      <input type="hidden" name="profile_id" value="<?= $row['profile_id'] ?>">
+      <input type="submit" value="Delete" name="delete">
+      <input type="submit" name="cancel" value="Cancel">
+    </form>
 
-    </div>
+  </div>
 
 </body>
 
