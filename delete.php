@@ -26,6 +26,14 @@ if (isset($_POST['delete']) && isset($_POST['profile_id'])) {
   $stmt->execute([
     ':zip' => $_POST['profile_id'],
   ]);
+
+  //remove the old position entries
+  $sql = 'DELETE FROM Position WHERE profile_id = :zip';
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([
+    ':zip' => $_POST['profile_id'],
+  ]);
+
   $_SESSION['success'] = 'Profile deleted';
   header("Location: index.php");
   return;

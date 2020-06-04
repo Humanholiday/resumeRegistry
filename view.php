@@ -17,6 +17,9 @@ $stmt->execute([
 ]);
 $row = $stmt->fetch(PDO::FETCH_ASSOC);
 
+//load up the position rows
+$positions = loadPos($pdo, $_REQUEST['profile_id']);
+
 //assign database data to variables
 $fn = htmlspecialchars($row['first_name']);
 $ln = htmlspecialchars($row['last_name']);
@@ -55,6 +58,13 @@ if ($row == false) {
       <?= $he ?></p>
     <p>Summary: <br>
       <?= $su ?></p>
+    <?php
+
+    foreach ($positions as $position) {
+      echo "<p>Position Year:&nbsp" . htmlspecialchars($position['year']) . "</p>";
+      echo "<p>Position Description:<br>" . htmlspecialchars($position['description']) . "</p>";
+    }
+    ?>
     <form action="" method="post">
       <input type="submit" value="Done" name="done">
     </form>

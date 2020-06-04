@@ -18,7 +18,6 @@ session_start();
 
     flashMessages();
 
-
     if (!isset($_SESSION['user_id'])) {
       echo '<h4><a href="login.php">Please Log In</a></h4>';
     }

@@ -72,6 +72,4 @@ if (isset($_POST['email']) && $_POST['pword']) {
     </form>
   </div>
 
-
-  <script src="script.js"></script>
 </body>

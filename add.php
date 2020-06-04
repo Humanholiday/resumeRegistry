@@ -20,21 +20,17 @@ if (
   isset($_POST['headline']) &&
   isset($_POST['summary'])
 ) {
-  // Data validation
-  if (
-    strlen($_POST['first_name']) < 1 ||
-    strlen($_POST['last_name']) < 1 ||
-    strlen($_POST['email']) < 1 ||
-    strlen($_POST['headline']) < 1 ||
-    strlen($_POST['summary']) < 1
-  ) {
-    $_SESSION['error'] = 'All fields must be completed';
+  // Data validation for profile fields
+  $msg = validateProfile();
+  if (is_string($msg)) {
+    $_SESSION['error'] = $msg;
     header("Location: add.php");
     return;
   }
-
-  if (strpos($_POST['email'], '@') === false) {
-    $_SESSION['error'] = 'Bad data';
+  //data validation for position fields if they exist
+  $msg = validatePos();
+  if (is_string($msg)) {
+    $_SESSION['error'] = $msg;
     header("Location: add.php");
     return;
   }
@@ -51,10 +47,33 @@ if (
     ':he' => $_POST['headline'],
     ':su' => $_POST['summary'],
   ]);
+
+  //get the profile id
+  $profile_id = $pdo->lastInsertId();
+
+  //Insert the position entries
+  $rank = 1;
+  for ($i = 0; $i <= 9; $i++) {
+    if (!isset($_POST['year' . $i])) continue;
+    if (!isset($_POST['desc' . $i])) continue;
+    $sql = "INSERT INTO Position (profile_id, rank, year, description)
+              VALUES (:pid, :ra, :yr, :de)";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([
+      ':pid' => $profile_id,
+      ':ra' => $rank,
+      ':yr' => $_POST['year' . $i],
+      ':de' => $_POST['desc' . $i],
+    ]);
+    $rank++;
+  }
+  //success message and redirect
   $_SESSION['success'] = 'Record Added';
   header('Location: index.php');
   return;
 }
+
+
 
 ?>
 <!DOCTYPE html>
@@ -66,10 +85,11 @@ if (
 </head>
 
 <body>
-  <?php flashMessages(); ?>
+
 
   <div class="container">
     <h1>Adding profile for <?= htmlspecialchars($_SESSION['name']) ?></h1>
+    <?php flashMessages(); ?>
     <form method="post">
       <p>First Name:
         <input type="text" name="first_name" size="60"></p>
@@ -81,6 +101,12 @@ if (
         <input type="text" name="headline" size="80"></p>
       <p>Summary: <br>
         <textarea name="summary" rows="8" cols="80"></textarea></p>
+
+      <p> Position: <input type="submit" id="addPos" value="+">
+        <div id="position_fields">
+        </div>
+      </p>
+
       <p><input type="submit" value="Add" />
         <input type="submit" name="cancel" value="Cancel" /></p>
     </form>
