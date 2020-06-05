@@ -10,15 +10,13 @@ if (isset($_POST['done'])) {
 }
 
 //prepare all user data from database
-$sql = 'SELECT * FROM profile where profile_id = :id';
-$stmt = $pdo->prepare($sql);
-$stmt->execute([
-  ':id' => $_GET['profile_id'],
-]);
-$row = $stmt->fetch(PDO::FETCH_ASSOC);
+$row = prepUser($pdo, $_REQUEST['profile_id']);
 
 //load up the position rows
 $positions = loadPos($pdo, $_REQUEST['profile_id']);
+
+//load up the education rows
+$educations = loadEdu($pdo, $_REQUEST['profile_id']);
 
 //assign database data to variables
 $fn = htmlspecialchars($row['first_name']);
@@ -63,6 +61,11 @@ if ($row == false) {
     foreach ($positions as $position) {
       echo "<p>Position Year:&nbsp" . htmlspecialchars($position['year']) . "</p>";
       echo "<p>Position Description:<br>" . htmlspecialchars($position['description']) . "</p>";
+    }
+
+    foreach ($educations as $education) {
+      echo "<p>Education Year:&nbsp" . htmlspecialchars($position['year']) . "</p>";
+      echo "<p>Institution:<br>" . htmlspecialchars($position['name']) . "</p>";
     }
     ?>
     <form action="" method="post">

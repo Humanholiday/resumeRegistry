@@ -21,7 +21,9 @@ function doValidate() {
   return false;
 }
 
-countPos = 0;
+//if countPos is not set from edit.php then assign it as 0.
+countPos = typeof countPos === "undefined" ? 0 : countPos;
+
 //insert position fields upon click of Position:+ button. uses jquery to insert html inside a div
 $(document).ready(function () {
   window.console && console.log("document ready called");
@@ -42,7 +44,7 @@ $(document).ready(function () {
           <input type="button" value="-" \
            onclick="$(\'#position' +
         countPos +
-        '\').remove();countPos--; return false;"></p> \
+        '\').remove(); return false;"></p> \
           <textarea name="desc' +
         countPos +
         '" rows="8" cols="80"></textarea>\
@@ -51,31 +53,35 @@ $(document).ready(function () {
   });
 });
 
-//FOR EDIT PAGE insert position fields upon click of Position:+ button. uses jquery to insert html inside a div. countEdit is the number of positions already submitted, drawn from the database.
+//insert Education fields upon click of Institution:+ button. uses jquery to insert html inside a div
+countEdu = typeof countEdu === "undefined" ? 0 : countEdu;
+
 $(document).ready(function () {
   window.console && console.log("document ready called");
-  $("#editPos").click(function (event) {
+  $("#addEdu").click(function (event) {
     event.preventDefault();
-    if (countEdit >= 9) {
-      alert("Maximum of nine position entries exceeded");
+    if (countEdu >= 9) {
+      alert("Maximum of nine education entries exceeded");
       return;
     }
-    countEdit++;
-    $("#position_fields").append(
-      '<div id="position' +
-        countEdit +
+    countEdu++;
+    $("#edu_fields").append(
+      '<div id="edu' +
+        countEdu +
         '"> \
-        <p>Year: <input type="text" name="year' +
-        countEdit +
+        <p>Year: <input type="text" name="edu_year' +
+        countEdu +
         '" value=""/> \
           <input type="button" value="-" \
-           onclick="$(\'#position' +
-        countEdit +
-        '\').remove();countEdit--; return false;"></p> \
-          <textarea name="desc' +
-        countEdit +
-        '" rows="8" cols="80"></textarea>\
+           onclick="$(\'#edu' +
+        countEdu +
+        '\').remove(); return false;"></p> \
+          <p>School: <input type="text" size="80" name="edu_school' +
+        countEdu +
+        '" class="school" value=""/></p>\
       </div>'
     );
+    $(".school").autocomplete({ source: "school.php" });
   });
+  $(".school").autocomplete({ source: "school.php" });
 });

@@ -5,11 +5,14 @@ session_start();
 
 clickCancel();
 
-if (!isset($_SESSION['user_id'])) {
-  $_SESSION['error'] = 'Not logged in';
+//check if user is logged in, if not redirect to login.php
+$logMsg = loginCheck();
+if (is_string($logMsg)) {
+  $_SESSION['error'] = $logMsg;
   header("Location: login.php");
   return;
 }
+
 
 //update database
 if (
@@ -38,6 +41,15 @@ if (
     return;
   }
 
+  //data validation for education fields if they exist
+  $msg = validateEdu();
+  if (is_string($msg)) {
+    $_SESSION['error'] = $msg;
+    $pid = $_REQUEST['profile_id'];
+    header("Location: edit.php?profile_id=$pid");
+    return;
+  }
+
   $sql =
     "UPDATE profile SET first_name = :fn, last_name= :ln, email = :em, headline = :he, summary = :su WHERE profile_id = :pid AND user_id = :uid";
   $stmt = $pdo->prepare($sql);
@@ -59,25 +71,17 @@ if (
   ]);
 
   //Insert the position entries
-  $rank = 1;
-  for (
-    $i = 0;
-    $i <= 9;
-    $i++
-  ) {
-    if (!isset($_POST['year' . $i])) continue;
-    if (!isset($_POST['desc' . $i])) continue;
-    $sql = "INSERT INTO Position (profile_id, rank, year, description)
-              VALUES (:pid, :ra, :yr, :de)";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-      ':pid' => $_REQUEST['profile_id'],
-      ':ra' => $rank,
-      ':yr' => $_POST['year' . $i],
-      ':de' => $_POST['desc' . $i],
-    ]);
-    $rank++;
-  }
+  insertPositions($pdo, $_REQUEST['profile_id']);
+
+  //remove the old education entries
+  $sql = 'DELETE FROM Education WHERE profile_id = :pid';
+  $stmt = $pdo->prepare($sql);
+  $stmt->execute([
+    ':pid' => $_REQUEST['profile_id'],
+  ]);
+
+  //Insert the education entries
+  insertEducations($pdo, $_REQUEST['profile_id']);
 
   $_SESSION['success'] = "Profile updated";
   header("Location: index.php");
@@ -85,16 +89,13 @@ if (
 }
 
 //prepare all user data from database
-$sql = 'SELECT * FROM profile where profile_id = :id';
-$stmt = $pdo->prepare($sql);
-$stmt->execute([
-  ':id' => $_REQUEST['profile_id'],
-]);
-$row = $stmt->fetch(PDO::FETCH_ASSOC);
+$row = prepUser($pdo, $_REQUEST['profile_id']);
 
 //load up the position rows
 $positions = loadPos($pdo, $_REQUEST['profile_id']);
 
+//load up the education rows
+$schools = loadEdu($pdo, $_REQUEST['profile_id']);
 
 
 //check that the value for user id is valid and if not redirect
@@ -122,7 +123,8 @@ $pid = $row['profile_id'];
 
 <!-- assign number of position items to js variable -->
 <script type="text/javascript">
-  var countEdit = <?php echo json_encode(count($positions)) ?>;
+  var countPos = <?php echo json_encode(count($positions)) ?>;
+  var countEdu = <?php echo json_encode(count($schools)) ?>;
 </script>
 
 
@@ -152,9 +154,34 @@ $pid = $row['profile_id'];
       <p>Summary: <br>
         <textarea name="summary" rows="8" cols="80"><?= $su ?></textarea></p>
       <!-- <input type="hidden" name="profile_id" value="<?= $pid ?>"> -->
-      <div id="position_fields_database">
-        <?php
 
+      <div id="edu_fields_database">
+        <p> Institution: <input type="submit" id="addEdu" value="+"></p>
+        <?php
+        foreach ($schools as $school) {
+          echo  '<div id="edu' .
+            $school['rank'] .
+            '"><p>Year: <input type="text" name="edu_year' .
+            $school['rank']  .
+            '" value="'
+            . htmlspecialchars($school['year']) .
+            '"/><input type="button" value="-"onclick="$(\'#edu' .
+            $school['rank'] .
+            '\').remove(); return false;"></p><p>School: <input type="text" size="80" name="edu_school' .
+            $school['rank'] .
+            '" class="school" value="'
+            . htmlspecialchars($school['name']) .
+            '"/></p></div>';
+        }
+        ?>
+        <div id="edu_fields">
+        </div>
+      </div>
+
+
+      <div id="position_fields_database">
+        <p> Position: <input type="submit" id="addPos" value="+"></p>
+        <?php
         foreach ($positions as $position) {
           echo  '<div id="position' .
             $position['rank'] .
@@ -164,22 +191,22 @@ $pid = $row['profile_id'];
             . htmlspecialchars($position['year']) .
             '"/><input type="button" value="-"onclick="$(\'#position' .
             $position['rank'] .
-            '\').remove();countEdit--; return false;"></p><textarea name="desc' .
+            '\').remove();countPos--; return false;"></p><textarea name="desc' .
             $position['rank']  .
             '" rows="8" cols="80">' .
             htmlspecialchars($position['description']) .
             '</textarea></div>';
         }
         ?>
-      </div>
-      <p> Position: <input type="submit" id="editPos" value="+">
         <div id="position_fields"></div>
-      </p>
+      </div>
 
       <p><input type="submit" value="Update" />
         <input type="submit" name="cancel" value="Cancel" /></p>
     </form>
   </div>
+
+  <?php require "foot.php" ?>
 </body>
 
 </html>

@@ -72,4 +72,5 @@ if (isset($_POST['email']) && $_POST['pword']) {
     </form>
   </div>
 
+  <?php require "foot.php" ?>
 </body>

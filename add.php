@@ -6,8 +6,10 @@ session_start();
 
 clickCancel();
 
-if (!isset($_SESSION['user_id'])) {
-  $_SESSION['error'] = 'Not logged in';
+//check if user is logged in, if not redirect to login.php
+$logMsg = loginCheck();
+if (is_string($logMsg)) {
+  $_SESSION['error'] = $logMsg;
   header("Location: login.php");
   return;
 }
@@ -35,6 +37,14 @@ if (
     return;
   }
 
+  //data validation for education fields if they exist
+  $msg = validatePos();
+  if (is_string($msg)) {
+    $_SESSION['error'] = $msg;
+    header("Location: add.php");
+    return;
+  }
+
   //prepare and execute query
   $sql = "INSERT INTO Profile (user_id, first_name, last_name, email, headline, summary)
               VALUES (:uid, :fn, :ln, :em, :he, :su)";
@@ -52,21 +62,11 @@ if (
   $profile_id = $pdo->lastInsertId();
 
   //Insert the position entries
-  $rank = 1;
-  for ($i = 0; $i <= 9; $i++) {
-    if (!isset($_POST['year' . $i])) continue;
-    if (!isset($_POST['desc' . $i])) continue;
-    $sql = "INSERT INTO Position (profile_id, rank, year, description)
-              VALUES (:pid, :ra, :yr, :de)";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute([
-      ':pid' => $profile_id,
-      ':ra' => $rank,
-      ':yr' => $_POST['year' . $i],
-      ':de' => $_POST['desc' . $i],
-    ]);
-    $rank++;
-  }
+  insertPositions($pdo, $profile_id);
+
+  //Insert the education entries
+  insertEducations($pdo, $profile_id);
+
   //success message and redirect
   $_SESSION['success'] = 'Record Added';
   header('Location: index.php');
@@ -102,16 +102,24 @@ if (
       <p>Summary: <br>
         <textarea name="summary" rows="8" cols="80"></textarea></p>
 
+      <p> Institution: <input type="submit" id="addEdu" value="+">
+        <div id="edu_fields">
+        </div>
+      </p>
+
+
       <p> Position: <input type="submit" id="addPos" value="+">
         <div id="position_fields">
         </div>
       </p>
+
 
       <p><input type="submit" value="Add" />
         <input type="submit" name="cancel" value="Cancel" /></p>
     </form>
   </div>
 
+  <?php require 'foot.php'; ?>
 </body>
 
 </html>

@@ -6,29 +6,18 @@ session_start();
 
 clickCancel();
 
-if (!isset($_SESSION['user_id'])) {
-  $_SESSION['error'] = 'Not logged in';
+//check if user is logged in, if not redirect to login.php
+$logMsg = loginCheck();
+if (is_string($logMsg)) {
+  $_SESSION['error'] = $logMsg;
   header("Location: login.php");
   return;
 }
 
-//check that profile id is present
-if (!isset($_GET['profile_id'])) {
-  $_SESSION['error'] = 'Invalid profile id';
-  header("Location: index.php");
-  return;
-}
 
 //when user hits submit prepare sql statement and execute then redirect to index.php
 if (isset($_POST['delete']) && isset($_POST['profile_id'])) {
   $sql = 'DELETE FROM Profile WHERE profile_id = :zip';
-  $stmt = $pdo->prepare($sql);
-  $stmt->execute([
-    ':zip' => $_POST['profile_id'],
-  ]);
-
-  //remove the old position entries
-  $sql = 'DELETE FROM Position WHERE profile_id = :zip';
   $stmt = $pdo->prepare($sql);
   $stmt->execute([
     ':zip' => $_POST['profile_id'],
@@ -39,23 +28,10 @@ if (isset($_POST['delete']) && isset($_POST['profile_id'])) {
   return;
 }
 
-//check that profile id is present
-if (!isset($_GET['profile_id'])) {
-  $_SESSION['error'] = 'Invalid profile id';
-  header("Location: index.php");
-  return;
-}
+//prepare all user data from database
+$row = prepUser($pdo, $_REQUEST['profile_id']);
 
-//prepare user id and name from database
-$sql =
-  'SELECT first_name, last_name, headline, profile_id, user_id FROM profile where profile_id = :id';
-$stmt = $pdo->prepare($sql);
-$stmt->execute([
-  ':id' => $_GET['profile_id'],
-]);
-$row = $stmt->fetch(PDO::FETCH_ASSOC);
-
-//check that the value for user id is valid and if not  redirect
+//check that the value for profile id is valid and if not  redirect
 if ($row == false) {
   $_SESSION['error'] = "Invalid Profile ID";
   header("Location: index.php");
@@ -93,6 +69,7 @@ if ($row['user_id'] != $_SESSION['user_id']) {
 
   </div>
 
+  <?php require "foot.php" ?>
 </body>
 
 </html>
